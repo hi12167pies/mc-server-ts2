@@ -1,0 +1,20 @@
+{
+  "name": "mc-server-ts2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx ts-node src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/colors": "^1.2.1",
+    "@types/node": "^20.14.2"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dynamic-buffer": "^1.0.3"
+  }
+}
