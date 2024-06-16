@@ -17,7 +17,7 @@ server.on("connection", (socket) => {
   let isFirstChunk = true
   socket.on("data", buffer => {
     if (buffer[0] == 0xFE && isFirstChunk) {
-      // legacy ping
+      // Legacy ping
       loggerWarn("Received unsupported legacy ping.")
       socket.destroy()
       return
