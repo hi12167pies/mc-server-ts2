@@ -24,7 +24,6 @@ export class Connection {
     packet.write(dataWriter)
 
     const dataBuffer = dataWriter.getBuffer()
-    loggerDebug("data", dataBuffer)
     const lengthWriter = new BufferWriter()
     lengthWriter.writeVarInt(dataBuffer.length)
 
@@ -32,8 +31,6 @@ export class Connection {
       lengthWriter.getBuffer(),
       dataBuffer
     ])
-    
-    loggerDebug(buffer, buffer.toString())
 
     this.socket.write(buffer)
   }
@@ -68,7 +65,5 @@ export class Connection {
     if (packet instanceof StatusPingPacket) {
       this.sendPacket(new StatusPongPacket(packet.payload))
     }
-
-    loggerDebug(packet)
   }
 }
