@@ -9,9 +9,14 @@ import { StatusResponsePacket } from "./packets/status/statusResponse";
 import { Chat } from "./chat/chat";
 import { StatusPingPacket } from "./packets/status/statusPing";
 import { StatusPongPacket } from "./packets/status/statusPong";
+import { LoginStartPacket } from "./packets/login/loginStart";
+import { LoginSuccessPacket } from "./packets/login/loginSuccess";
+import { v4 as generateUUIDv4 } from "uuid"
+import { PlayerEntity } from "./entity/player";
 
 export class Connection {
   public state: State = State.Handshaking
+  public player?: PlayerEntity
 
   constructor(
     public socket: Socket
@@ -62,8 +67,18 @@ export class Connection {
       }))
     }
 
+    if (packet instanceof LoginStartPacket) {
+      this.player = new PlayerEntity(this, packet.username, generateUUIDv4())
+      this.sendPacket(new LoginSuccessPacket(this.player.username, this.player.uuid))
+      this.state = State.Play
+    }
+
     if (packet instanceof StatusPingPacket) {
       this.sendPacket(new StatusPongPacket(packet.payload))
     }
+  }
+
+  public init() {
+
   }
 }

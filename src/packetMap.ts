@@ -1,5 +1,6 @@
 import { State } from "./enum/state"
 import { HandshakePacket } from "./packets/handshaking/handshake"
+import { LoginStartPacket } from "./packets/login/loginStart"
 import { Packet } from "./packets/packet"
 import { StatusPingPacket } from "./packets/status/statusPing"
 import { StatusRequestPacket } from "./packets/status/statusRequest"
@@ -18,6 +19,8 @@ export const packetMap: PacketMap = {
     [0x00]: StatusRequestPacket,
     [0x01]: StatusPingPacket,
   },
-  [State.Login]: {},
+  [State.Login]: {
+    [0x00]: LoginStartPacket
+  },
   [State.Play]: {}
 }
