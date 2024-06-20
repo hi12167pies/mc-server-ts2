@@ -20,7 +20,6 @@ import { randomUUID } from "crypto";
 import { SetDifficultyPacket } from "./packets/play/setDifficulty";
 import { SpawnPositionPacket } from "./packets/play/spawnPosition";
 import { tempWorld } from ".";
-import { ChunkBulkPacket } from "./packets/play/chunkBulk";
 
 export class Connection {
   public state: State = State.Handshaking
@@ -110,6 +109,5 @@ export class Connection {
     for (const chunk of this.player.world.chunks.values()) {
       chunks.push(chunk)
     }
-    this.sendPacket(new ChunkBulkPacket(this.player.world, chunks))
   }
 }

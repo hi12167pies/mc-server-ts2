@@ -4,20 +4,13 @@ import { readVarIntBuffer } from "./utils/bufferUtils"
 import { BufferReader } from "./buffer/bufferReader"
 import { packetMap } from "./packetMap"
 import { Connection } from "./connnection"
-import { World } from "./world/world"
 import { Dimension } from "./enum/dimension"
 import { Difficulty } from "./enum/difficulty"
+import { World } from "./world/world"
 
 const server = net.createServer()
 
 export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy)
-
-for (let x = 0; x < 16; x++) {
-  for (let z = 0; z < 16; z++) {
-    tempWorld.setBlock({x, y: 0, z}, { type: x+z, meta: 0 })
-  }
-}
-
 
 server.on("connection", (socket) => {
   const connection = new Connection(socket)

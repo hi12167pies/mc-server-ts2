@@ -1,5 +1,4 @@
 import { Connection } from "../connnection";
-import { PositionLook } from "../position";
 import { World } from "../world/world";
 import { Entity } from "./entity";
 
