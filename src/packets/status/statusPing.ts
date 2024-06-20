@@ -11,7 +11,7 @@ export class StatusPingPacket implements Packet {
   }
 
   getState(): State {
-    throw State.Status
+    return State.Status
   }
 
   read(reader: BufferReader): void {

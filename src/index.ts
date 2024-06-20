@@ -4,8 +4,20 @@ import { readVarIntBuffer } from "./utils/bufferUtils"
 import { BufferReader } from "./buffer/bufferReader"
 import { packetMap } from "./packetMap"
 import { Connection } from "./connnection"
+import { World } from "./world/world"
+import { Dimension } from "./enum/dimension"
+import { Difficulty } from "./enum/difficulty"
 
 const server = net.createServer()
+
+export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy)
+
+for (let x = 0; x < 16; x++) {
+  for (let z = 0; z < 16; z++) {
+    tempWorld.setBlock({x, y: 0, z}, { type: x+z, meta: 0 })
+  }
+}
+
 
 server.on("connection", (socket) => {
   const connection = new Connection(socket)
@@ -70,7 +82,7 @@ server.on("connection", (socket) => {
       try {
         connection.handlePacket(packet)
       } catch (e) {
-        loggerError(`Failed to hande packet`, packet, e)
+        loggerError(`Failed to handle packet`, packet, e)
         return
       }
     }
@@ -79,6 +91,6 @@ server.on("connection", (socket) => {
 
 
 server.listen(25567, () => {
-  // @ts-ignore - types says address is string?
+  // @ts-ignore - typescript types says address is string?
   loggerInfo("Server online " + server.address().port)
 })

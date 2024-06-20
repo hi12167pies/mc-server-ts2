@@ -1,27 +1,26 @@
 import { BufferReader } from "../../buffer/bufferReader";
 import { BufferWriter } from "../../buffer/bufferWriter";
+import { Difficulty } from "../../enum/difficulty";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class LoginSuccessPacket implements Packet {
+export class SetDifficultyPacket implements Packet {
   constructor(
-    public username: string,
-    public uuid: string
+    public difficulty: Difficulty
   ) {}
 
   getId(): number {
-    return 0x02
+    return 0x41
   }
-
+  
   getState(): State {
-    return State.Login
+    return State.Play
   }
-
+  
   read(reader: BufferReader): void {
   }
   
   write(writer: BufferWriter): void {
-    writer.writeString(this.uuid)
-    writer.writeString(this.username)
+    writer.writeUnsignedByte(this.difficulty)
   }
 }

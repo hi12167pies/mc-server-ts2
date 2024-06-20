@@ -4,6 +4,11 @@ export type Position = {
   z: number
 }
 
+export type ChunkPosition = {
+  x: number,
+  z: number
+}
+
 export type PositionLook = Position & {
   yaw: number,
   pitch: number
