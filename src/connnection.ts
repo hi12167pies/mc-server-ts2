@@ -103,11 +103,11 @@ export class Connection {
       false
     ))
 
-    this.sendPacket(new SetDifficultyPacket(this.player.world.difficulty))
-    this.sendPacket(new SpawnPositionPacket(this.player.world.spawn))
-    const chunks = []
-    for (const chunk of this.player.world.chunks.values()) {
-      chunks.push(chunk)
-    }
+    // this.sendPacket(new SetDifficultyPacket(this.player.world.difficulty))
+    // this.sendPacket(new SpawnPositionPacket(this.player.world.spawn))
+    // const chunks = []
+    // for (const chunk of this.player.world.chunks.values()) {
+    //   chunks.push(chunk)
+    // }
   }
 }
