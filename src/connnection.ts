@@ -20,6 +20,7 @@ import { randomUUID } from "crypto";
 import { SetDifficultyPacket } from "./packets/play/setDifficulty";
 import { SpawnPositionPacket } from "./packets/play/spawnPosition";
 import { tempWorld } from ".";
+import { LoginDisconnectPacket } from "./packets/login/loginDisconnect";
 
 export class Connection {
   public state: State = State.Handshaking

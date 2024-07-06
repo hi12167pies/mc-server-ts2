@@ -6,7 +6,7 @@ import { Packet } from "../packet"
 
 export class LoginDisconnectPacket implements Packet {
   constructor(
-    public reason: Chat
+    public reason: string
   ) {}
 
   getId(): number {
@@ -21,6 +21,6 @@ export class LoginDisconnectPacket implements Packet {
   }
   
   write(writer: BufferWriter): void {
-    writer.writeChat(this.reason)
+    writer.writeString(this.reason)
   }
 }
