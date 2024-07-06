@@ -1,5 +1,6 @@
 import { DynamicBuffer } from "dynamic-buffer"
 import { Position } from "../position"
+import { Chat } from "../chat/chat"
 
 export class BufferWriter {
   private buffer: DynamicBuffer
@@ -77,6 +78,10 @@ export class BufferWriter {
 
   writeJson(json: any) {
     this.writeString(JSON.stringify(json))
+  }
+
+  writeChat(chat: Chat) {
+    this.writeJson(chat.toString())
   }
 
   writeLong(long: bigint) {
