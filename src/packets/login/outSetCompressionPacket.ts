@@ -3,7 +3,7 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class SetCompressionPacket implements Packet {
+export class OutSetCompressionPacket implements Packet {
   constructor(
     public threshold: number
   ) {}

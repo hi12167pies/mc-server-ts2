@@ -4,6 +4,7 @@ import { Dimension } from "./src/enum/dimension";
 import { chunkIntToPos } from "./src/utils/worldUtils";
 import { World } from "./src/world/world";
 import { BufferWriter } from "./src/buffer/bufferWriter";
+import { BufferReader } from "./src/buffer/bufferReader";
 
 // const world = new World(Dimension.Overworld, Difficulty.Easy)
 
@@ -28,4 +29,8 @@ import { BufferWriter } from "./src/buffer/bufferWriter";
 // console.log(buffer1.toBuffer())
 
 
-const buff = Buffer.alloc(8192)
+const bytes = [0x04, 0xbf, 0xb9, 0x99, 0x99, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+const buff = Buffer.from(bytes)
+
+const reader = new BufferReader(buff)
+console.log(reader.readVarInt())

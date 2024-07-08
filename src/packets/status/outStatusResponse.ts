@@ -23,7 +23,7 @@ export type StatusResponseData = {
   favicon?: string
 }
 
-export class StatusResponsePacket implements Packet {
+export class OutStatusResponsePacket implements Packet {
   constructor(
     public data: StatusResponseData
   ) {}

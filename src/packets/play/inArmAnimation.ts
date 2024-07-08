@@ -3,17 +3,11 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class SpawnPositionPacket implements Packet {
-  constructor(
-    public x: number,
-    public y: number,
-    public z: number,
-  ) {}
-
+export class InArmAnimation implements Packet {
   getId(): number {
-    return 0x05
+    return 0x0A
   }
-  
+
   getState(): State {
     return State.Play
   }
@@ -22,6 +16,5 @@ export class SpawnPositionPacket implements Packet {
   }
   
   write(writer: BufferWriter): void {
-    writer.writePosition(this.x, this.y, this.z)
   }
 }

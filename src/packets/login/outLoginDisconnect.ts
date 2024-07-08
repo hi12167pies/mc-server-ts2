@@ -4,7 +4,7 @@ import { Chat } from "../../chat/chat"
 import { State } from "../../enum/state"
 import { Packet } from "../packet"
 
-export class LoginDisconnectPacket implements Packet {
+export class OutLoginDisconnectPacket implements Packet {
   constructor(
     public reason: Chat
   ) {}

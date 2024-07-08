@@ -3,7 +3,7 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class HandshakePacket implements Packet {
+export class InHandshakePacket implements Packet {
   constructor(
     public protocolVersion?: number,
     public address?: string,
@@ -22,7 +22,7 @@ export class HandshakePacket implements Packet {
   read(reader: BufferReader) {
     this.protocolVersion = reader.readVarInt()
     this.address = reader.readString()
-    this.port = reader.readUnsignnedShort()
+    this.port = reader.readUnsignedShort()
     this.nextState = reader.readVarInt()
   }
 

@@ -3,11 +3,14 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class LoginStartPacket implements Packet {
-  username: string
+export class InLoginSuccessPacket implements Packet {
+  constructor(
+    public username: string,
+    public uuid: string
+  ) {}
 
   getId(): number {
-    return 0x00
+    return 0x02
   }
 
   getState(): State {
@@ -15,9 +18,10 @@ export class LoginStartPacket implements Packet {
   }
 
   read(reader: BufferReader): void {
-    this.username = reader.readString()
   }
   
   write(writer: BufferWriter): void {
+    writer.writeString(this.uuid)
+    writer.writeString(this.username)
   }
 }

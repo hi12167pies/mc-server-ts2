@@ -1,10 +1,17 @@
 import { State } from "./enum/state"
-import { HandshakePacket } from "./packets/handshaking/handshake"
-import { LoginStartPacket } from "./packets/login/loginStart"
+import { InHandshakePacket } from "./packets/handshaking/inHandshake"
+import { InLoginStartPacket } from "./packets/login/inLoginStart"
 import { Packet } from "./packets/packet"
+import { InArmAnimation } from "./packets/play/inArmAnimation"
+import { InClientSettingsPacket } from "./packets/play/inClientSettings"
+import { InPlayerGroundPacket } from "./packets/play/inGroundPacket"
 import { InPlayerPosLookPacket } from "./packets/play/inPlayerPosLook"
-import { StatusPingPacket } from "./packets/status/statusPing"
-import { StatusRequestPacket } from "./packets/status/statusRequest"
+import { InPluginMessage } from "./packets/play/inPluginMessage"
+import { InPlayerAbilitiesPacket } from "./packets/play/inPlayerAbilities"
+import { InPlayerLookPacket } from "./packets/play/inPlayerLook"
+import { InPlayerPositionPacket } from "./packets/play/inPlayerPosition"
+import { InStatusPingPacket } from "./packets/status/inStatusPing"
+import { InStatusRequestPacket } from "./packets/status/inStatusRequest"
 
 export type PacketMap = {
   [key in State]: {
@@ -14,16 +21,23 @@ export type PacketMap = {
 
 export const packetMap: PacketMap = {
   [State.Handshaking]: {
-    [0x00]: HandshakePacket
+    [0x00]: InHandshakePacket
   },
   [State.Status]: {
-    [0x00]: StatusRequestPacket,
-    [0x01]: StatusPingPacket,
+    [0x00]: InStatusRequestPacket,
+    [0x01]: InStatusPingPacket,
   },
   [State.Login]: {
-    [0x00]: LoginStartPacket
+    [0x00]: InLoginStartPacket
   },
   [State.Play]: {
-    [0x06]: InPlayerPosLookPacket
+    [0x03]: InPlayerGroundPacket,
+    [0x04]: InPlayerPositionPacket,
+    [0x05]: InPlayerLookPacket,
+    [0x06]: InPlayerPosLookPacket,
+    [0x0A]: InArmAnimation,
+    [0x13]: InPlayerAbilitiesPacket,
+    [0x15]: InClientSettingsPacket,
+    [0x17]: InPluginMessage
   }
 }

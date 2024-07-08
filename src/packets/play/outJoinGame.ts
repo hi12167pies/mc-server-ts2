@@ -7,7 +7,7 @@ import { LevelType } from "../../enum/levelType";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class JoinGamePacket implements Packet {
+export class OutJoinGamePacket implements Packet {
   constructor(
     public entityId: number,
     public gamemode: Gamemode,

@@ -1,28 +1,29 @@
 import { Socket } from "net";
 import { State } from "./enum/state";
 import { Packet } from "./packets/packet";
-import { HandshakePacket } from "./packets/handshaking/handshake";
+import { InHandshakePacket } from "./packets/handshaking/inHandshake";
 import { BufferWriter } from "./buffer/bufferWriter";
-import { StatusRequestPacket } from "./packets/status/statusRequest";
-import { StatusResponsePacket } from "./packets/status/statusResponse";
+import { InStatusRequestPacket } from "./packets/status/inStatusRequest";
+import { OutStatusResponsePacket } from "./packets/status/outStatusResponse";
 import { Chat } from "./chat/chat";
-import { StatusPingPacket } from "./packets/status/statusPing";
-import { StatusPongPacket } from "./packets/status/statusPong";
-import { LoginStartPacket } from "./packets/login/loginStart";
-import { LoginSuccessPacket } from "./packets/login/loginSuccess";
+import { InStatusPingPacket } from "./packets/status/inStatusPing";
+import { OutStatusPongPacket } from "./packets/status/outStatusPong";
+import { InLoginStartPacket } from "./packets/login/inLoginStart";
+import { InLoginSuccessPacket } from "./packets/login/inLoginSuccess";
 import { PlayerEntity } from "./entity/player";
-import { JoinGamePacket } from "./packets/play/joinGame";
+import { OutJoinGamePacket } from "./packets/play/outJoinGame";
 import { Gamemode } from "./enum/gamemode";
 import { Dimension } from "./enum/dimension";
 import { Difficulty } from "./enum/difficulty";
 import { LevelType } from "./enum/levelType";
 import { randomUUID } from "crypto";
 import { tempWorld } from ".";
-import { SetDifficultyPacket } from "./packets/play/setDifficulty";
-import { SpawnPositionPacket } from "./packets/play/spawnPosition";
-import { ChunkBulkPacket } from "./packets/play/chunkBulk";
+import { OutSetDifficultyPacket } from "./packets/play/outSetDifficulty";
+import { OutSpawnPositionPacket } from "./packets/play/outSpawnPosition";
+import { OutChunkBulkPacket } from "./packets/play/outChunkBulk";
 import { OutPlayerPosLookPacket } from "./packets/play/outPlayerPosLook";
-import { SetCompressionPacket } from "./packets/login/setCompressionPacket";
+import { OutSetCompressionPacket } from "./packets/login/outSetCompressionPacket";
+import { InPluginMessage } from "./packets/play/inPluginMessage";
 
 export class Connection {
   public state: State = State.Handshaking
@@ -65,7 +66,7 @@ export class Connection {
   }
 
   public handlePacket(packet: Packet) {
-    if (packet instanceof HandshakePacket) {
+    if (packet instanceof InHandshakePacket) {
       switch (packet.nextState) {
         case 1:
           this.state = State.Status
@@ -76,8 +77,8 @@ export class Connection {
       }
     }
 
-    if (packet instanceof StatusRequestPacket) {
-      this.sendPacket(new StatusResponsePacket({
+    if (packet instanceof InStatusRequestPacket) {
+      this.sendPacket(new OutStatusResponsePacket({
         version: {
           name: "vanilla",
           protocol: 47
@@ -91,16 +92,16 @@ export class Connection {
       }))
     }
     
-    if (packet instanceof StatusPingPacket) {
-      this.sendPacket(new StatusPongPacket(packet.payload))
+    if (packet instanceof InStatusPingPacket) {
+      this.sendPacket(new OutStatusPongPacket(packet.payload))
     }
 
-    if (packet instanceof LoginStartPacket) {
+    if (packet instanceof InLoginStartPacket) {
       // create the player
       this.player = new PlayerEntity(this, packet.username, randomUUID(), tempWorld)
       
       // complete login
-      this.sendPacket(new LoginSuccessPacket(this.player.username, this.player.uuid))
+      this.sendPacket(new InLoginSuccessPacket(this.player.username, this.player.uuid))
       // this.sendPacket(new SetCompressionPacket(-1))
 
       // change state and init the player
@@ -110,7 +111,7 @@ export class Connection {
   }
 
   public init() {
-    this.sendPacket(new JoinGamePacket(
+    this.sendPacket(new OutJoinGamePacket(
       this.player.eid,
       Gamemode.Creative,
       Dimension.Overworld,
@@ -120,12 +121,12 @@ export class Connection {
       false
     ))
 
-    this.sendPacket(new SetDifficultyPacket(this.player.world.difficulty))
-    this.sendPacket(new SpawnPositionPacket(this.player.world.spawnX, this.player.world.spawnY, this.player.world.spawnZ))
+    this.sendPacket(new OutSetDifficultyPacket(this.player.world.difficulty))
+    this.sendPacket(new OutSpawnPositionPacket(this.player.world.spawnX, this.player.world.spawnY, this.player.world.spawnZ))
     this.sendPacket(new OutPlayerPosLookPacket(this.player.locX, this.player.locY, this.player.locZ, this.player.yaw, this.player.pitch))
 
     const chunks = [...this.player.world.chunks.values()]
-    this.sendPacket(new ChunkBulkPacket(this.player.world.dimension, chunks))
+    this.sendPacket(new OutChunkBulkPacket(this.player.world.dimension, chunks))
 
   }
 }

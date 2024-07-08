@@ -3,15 +3,11 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class StatusPongPacket implements Packet {
-  constructor(
-    public payload: bigint
-  ) {}
-
+export class InStatusRequestPacket implements Packet {
   getId(): number {
-    return 0x01
+    return 0x00
   }
-
+  
   getState(): State {
     return State.Status
   }
@@ -20,6 +16,5 @@ export class StatusPongPacket implements Packet {
   }
 
   write(writer: BufferWriter): void {
-    writer.writeLong(this.payload)
   }
 }

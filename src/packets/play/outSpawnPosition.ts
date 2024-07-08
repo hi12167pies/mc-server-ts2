@@ -3,25 +3,25 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class LoginSuccessPacket implements Packet {
+export class OutSpawnPositionPacket implements Packet {
   constructor(
-    public username: string,
-    public uuid: string
+    public x: number,
+    public y: number,
+    public z: number,
   ) {}
 
   getId(): number {
-    return 0x02
+    return 0x05
   }
-
+  
   getState(): State {
-    return State.Login
+    return State.Play
   }
-
+  
   read(reader: BufferReader): void {
   }
   
   write(writer: BufferWriter): void {
-    writer.writeString(this.uuid)
-    writer.writeString(this.username)
+    writer.writePosition(this.x, this.y, this.z)
   }
 }

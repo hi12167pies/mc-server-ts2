@@ -7,7 +7,7 @@ import { chunkIntToPos } from "../../utils/worldUtils";
 import { Chunk } from "../../world/chunk";
 import { Packet } from "../packet";
 
-export class ChunkBulkPacket implements Packet {
+export class OutChunkBulkPacket implements Packet {
   constructor(
     public dimension: Dimension,
     public chunks: Chunk[]

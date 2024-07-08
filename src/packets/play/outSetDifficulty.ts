@@ -1,23 +1,26 @@
 import { BufferReader } from "../../buffer/bufferReader";
 import { BufferWriter } from "../../buffer/bufferWriter";
+import { Difficulty } from "../../enum/difficulty";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class StatusPingPacket implements Packet {
-  payload: bigint
+export class OutSetDifficultyPacket implements Packet {
+  constructor(
+    public difficulty: Difficulty
+  ) {}
 
   getId(): number {
-    return 0x01
+    return 0x41
   }
-
+  
   getState(): State {
-    return State.Status
+    return State.Play
   }
-
+  
   read(reader: BufferReader): void {
-    this.payload = reader.readLong()
   }
-
+  
   write(writer: BufferWriter): void {
+    writer.writeUnsignedByte(this.difficulty)
   }
 }

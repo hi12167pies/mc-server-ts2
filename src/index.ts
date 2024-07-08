@@ -1,5 +1,5 @@
 import net from "net"
-import { loggerError, loggerInfo, loggerWarn } from "./utils/logger"
+import { loggerDebug, loggerError, loggerInfo, loggerWarn } from "./utils/logger"
 import { readVarIntBuffer } from "./utils/bufferUtils"
 import { BufferReader } from "./buffer/bufferReader"
 import { packetMap } from "./packetMap"
@@ -39,53 +39,69 @@ server.on("connection", (socket) => {
       buffer = Buffer.concat([connection.lastChunk, incomingBuffer])
       connection.lastChunk = null
     }
-    
+
     while (buffer.length > 0) {
-      let readIndex = 0
-      
-      let lengthInfo: any
+      let index = 0
+
+      let length: any
       try {
-        lengthInfo = readVarIntBuffer(buffer, readIndex)
+        length = readVarIntBuffer(buffer, index)
       } catch (e) {
-        // there is not enough data
         connection.lastChunk = buffer
+        loggerDebug("Waiting for more data...")
         break
       }
-      
-      const length = lengthInfo.value
-      readIndex += lengthInfo.index
+      index = length.index
 
-      if (length == 0) continue
-      
-      // there is not enough data
-      if (buffer.length < length) {
+      if (buffer.length < length.value) {
         connection.lastChunk = buffer
+        loggerDebug("Waiting for more data...")
         break
       }
 
+      const buff = buffer.subarray(index, length.value + 1)
 
-      const packetData = buffer.subarray(readIndex, length + readIndex)
-      const packetReader = new BufferReader(packetData)
+      // resize original
+      buffer = buffer.subarray(length.value + 1, buffer.length)
+
+      const reader = new BufferReader(buff)
+
+      let packetId: number
+      
+      try {
+        packetId = reader.readVarInt()
+      } catch (e) {
+        loggerError("Faield to read packet id from inital buffer. ", e)
+        break
+      }
+      
+      const constructor = packetMap[connection.state][packetId]
+
+      if (constructor == undefined) {
+        if (packetId > 0x99) {
+          loggerError(`Packet id too large (0x${packetId.toString(16)})`, buff)
+          break
+        }
+        loggerWarn("Unknown packet id 0x" + packetId.toString(16))
+        break
+      }
+
+      const packet = new constructor()
 
       try {
-        const id = packetReader.readVarInt()
+        packet.read(reader)
+      } catch (e) {
+        loggerError(`Failed to read packet (0x${packetId.toString(16)}, state:${connection.state})`, e)
+        break
+      }
 
-        const packet = new packetMap[connection.state][id]()
-
-        if (packet == undefined) {
-          loggerError("Unknown packet " + id)
-        }
-
-        packet.read(packetReader)
-
+      try {
         connection.handlePacket(packet)
       } catch (e) {
-        loggerError("Failed to read packet")
+        loggerError(`Failed to handle packet (0x${packetId.toString(16)}, state:${connection.state})`, e)
+        break
       }
-
-      buffer = buffer.subarray(readIndex, buffer.byteLength)
     }
-
   })
 })
 
