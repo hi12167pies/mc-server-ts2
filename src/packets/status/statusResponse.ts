@@ -41,7 +41,7 @@ export class StatusResponsePacket implements Packet {
 
   write(writer: BufferWriter): void {
     // @ts-ignore Modify for sending packet
-    this.data.description = this.data.description.toString()
+    this.data.description = this.data.description.toJson()
     writer.writeJson(this.data)
   }
 }

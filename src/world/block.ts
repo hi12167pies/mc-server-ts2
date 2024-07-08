@@ -1,4 +1,4 @@
-export type Block = {
+export type BlockData = {
   type: number,
-  id: number
+  data: number
 }

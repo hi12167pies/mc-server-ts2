@@ -11,6 +11,9 @@ import { World } from "./world/world"
 const server = net.createServer()
 
 export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy)
+tempWorld.setBlockAt(0,0,0, { type: 1, data: 0 })
+tempWorld.setBlockAt(1,0,0, { type: 2, data: 0 })
+tempWorld.setBlockAt(2,55,0, { type: 2, data: 0 })
 
 server.on("connection", (socket) => {
   const connection = new Connection(socket)
@@ -19,71 +22,74 @@ server.on("connection", (socket) => {
     // Ignore errors, mostly from socket disconnecting
   })
 
-  let isFirstChunk = true
-  socket.on("data", buffer => {
-    if (buffer[0] == 0xFE && isFirstChunk) {
+  socket.on("data", incomingBuffer => {
+    if (incomingBuffer[0] == 0xFE && connection.isFirstChunk) {
       // Legacy ping
       loggerWarn("Received unsupported legacy ping.")
       socket.destroy()
       return
     }
 
-    if (isFirstChunk) {
-      isFirstChunk = false
+    if (connection.isFirstChunk) {
+      connection.isFirstChunk = false
     }
 
-    // Buffer index is the current index of the buffer for reading data
-    let bufferIndex = 0
-
-    while (bufferIndex < buffer.length) {
-      // Read VarInt for data length
-      const dataInfo = readVarIntBuffer(buffer, bufferIndex)
-      bufferIndex = dataInfo.index
-      const dataLength = dataInfo.value
-
-      // Read the packet
-      const data = buffer.subarray(bufferIndex, bufferIndex + dataLength)
-      bufferIndex += dataLength
+    let buffer = incomingBuffer
+    if (connection.lastChunk != null) {
+      buffer = Buffer.concat([connection.lastChunk, incomingBuffer])
+      connection.lastChunk = null
+    }
+    
+    while (buffer.length > 0) {
+      let readIndex = 0
       
-      const dataReader = new BufferReader(data)
-
-      let packetId: number
-
+      let lengthInfo: any
       try {
-        packetId = dataReader.readVarInt()
+        lengthInfo = readVarIntBuffer(buffer, readIndex)
       } catch (e) {
-        loggerError(`Failed to read packet (state ${connection.state})`)
-        return
+        // there is not enough data
+        connection.lastChunk = buffer
+        break
       }
       
-      const packetConstructor = packetMap[connection.state][packetId]
+      const length = lengthInfo.value
+      readIndex += lengthInfo.index
 
-      if (packetConstructor == null) {
-        loggerError(`Unknown packet id ${packetId} (state ${connection.state})`)
-        return
+      if (length == 0) continue
+      
+      // there is not enough data
+      if (buffer.length < length) {
+        connection.lastChunk = buffer
+        break
       }
 
-      const packet = new packetConstructor()
+
+      const packetData = buffer.subarray(readIndex, length + readIndex)
+      const packetReader = new BufferReader(packetData)
 
       try {
-        packet.read(dataReader)
-      } catch (e) {
-        loggerError(`Failed to read packet (Id: ${packetId}, State: ${connection.state})`, e)
-        return
-      }
+        const id = packetReader.readVarInt()
 
-      try {
+        const packet = new packetMap[connection.state][id]()
+
+        if (packet == undefined) {
+          loggerError("Unknown packet " + id)
+        }
+
+        packet.read(packetReader)
+
         connection.handlePacket(packet)
       } catch (e) {
-        loggerError(`Failed to handle packet`, packet, e)
-        return
+        loggerError("Failed to read packet")
       }
+
+      buffer = buffer.subarray(readIndex, buffer.byteLength)
     }
+
   })
 })
 
 
 server.listen(25567, () => {
-  // @ts-ignore - typescript types says address is string?
-  loggerInfo("Server online " + server.address().port)
+  loggerInfo("Server online " + (server.address() as net.SocketAddress).port)
 })

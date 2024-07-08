@@ -17,14 +17,20 @@ import { Dimension } from "./enum/dimension";
 import { Difficulty } from "./enum/difficulty";
 import { LevelType } from "./enum/levelType";
 import { randomUUID } from "crypto";
+import { tempWorld } from ".";
 import { SetDifficultyPacket } from "./packets/play/setDifficulty";
 import { SpawnPositionPacket } from "./packets/play/spawnPosition";
-import { tempWorld } from ".";
-import { LoginDisconnectPacket } from "./packets/login/loginDisconnect";
+import { ChunkBulkPacket } from "./packets/play/chunkBulk";
+import { OutPlayerPosLookPacket } from "./packets/play/outPlayerPosLook";
+import { SetCompressionPacket } from "./packets/login/setCompressionPacket";
 
 export class Connection {
   public state: State = State.Handshaking
   public player?: PlayerEntity
+
+  // network
+  public isFirstChunk: boolean = false
+  public lastChunk: Buffer | null = null
 
   constructor(
     public socket: Socket
@@ -33,18 +39,28 @@ export class Connection {
   public sendPacket(packet: Packet) {
     const dataWriter = new BufferWriter()
 
+    // write packet id
     dataWriter.writeVarInt(packet.getId())
+
+    // write packet data
     packet.write(dataWriter)
 
+    // get the buffer from the temp writer
     const dataBuffer = dataWriter.getBuffer()
+    
+    // create a new writer
     const lengthWriter = new BufferWriter()
+    
+    // write the length from the buffer
     lengthWriter.writeVarInt(dataBuffer.length)
 
+    // join the two buffers together
     const buffer = Buffer.concat([
       lengthWriter.getBuffer(),
       dataBuffer
     ])
 
+    // write to the socket
     this.socket.write(buffer)
   }
 
@@ -104,11 +120,12 @@ export class Connection {
       false
     ))
 
-    // this.sendPacket(new SetDifficultyPacket(this.player.world.difficulty))
-    // this.sendPacket(new SpawnPositionPacket(this.player.world.spawn))
-    // const chunks = []
-    // for (const chunk of this.player.world.chunks.values()) {
-    //   chunks.push(chunk)
-    // }
+    this.sendPacket(new SetDifficultyPacket(this.player.world.difficulty))
+    this.sendPacket(new SpawnPositionPacket(this.player.world.spawnX, this.player.world.spawnY, this.player.world.spawnZ))
+    this.sendPacket(new OutPlayerPosLookPacket(this.player.locX, this.player.locY, this.player.locZ, this.player.yaw, this.player.pitch))
+
+    const chunks = [...this.player.world.chunks.values()]
+    this.sendPacket(new ChunkBulkPacket(this.player.world.dimension, chunks))
+
   }
 }

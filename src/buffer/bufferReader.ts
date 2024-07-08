@@ -8,6 +8,7 @@ export class BufferReader {
     let value = 0
     // 4 is max length of varint, so if its above just ignore
     for (let i = 0; i < 4; i++) {
+      if (this.buffer[this.index] == undefined) throw new Error("Attempted to read out of range")
       value |= (this.buffer[this.index] & 0x7F) << i * 7
       this.index++
       if ((this.buffer[this.index] & 0x80) == 0) break;
@@ -33,5 +34,23 @@ export class BufferReader {
     const long = this.buffer.readBigInt64BE(this.index)
     this.index += 8
     return long
+  }
+
+  readDouble() {
+    const double = this.buffer.readDoubleBE(this.index)
+    this.index += 8
+    return double
+  }
+
+  readFloat() {
+    const float = this.buffer.readFloatBE(this.index)
+    this.index += 4
+    return float
+  }
+
+  readBoolean() {
+    const boolean = this.buffer.readUint8(this.index) == 0x01
+    this.index += 1
+    return boolean
   }
 }

@@ -60,4 +60,8 @@ export class Chat {
   toString() {
     return JSON.stringify(this.json)
   }
+
+  toJson() {
+    return this.json
+  }
 }

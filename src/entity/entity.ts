@@ -1,4 +1,3 @@
-import { PositionLook } from "../position"
 import { World } from "../world/world"
 
 let globalEntityId = 0
@@ -10,7 +9,9 @@ export class Entity {
 
   public eid: number = globalEntityId++
   
-  public position: PositionLook = {
-    x: 0, y: 0, z: 0, yaw: 0, pitch: 0
-  }
+  public locX: number = 0
+  public locY: number = 0
+  public locZ: number = 0
+  public yaw: number = 0
+  public pitch: number = 0
 }

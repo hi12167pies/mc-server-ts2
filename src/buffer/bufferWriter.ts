@@ -1,5 +1,4 @@
 import { DynamicBuffer } from "dynamic-buffer"
-import { Position } from "../position"
 import { Chat } from "../chat/chat"
 
 export class BufferWriter {
@@ -45,13 +44,6 @@ export class BufferWriter {
     this.index += 1
   }
 
-  writeUnsignedByteArray(array: number[]) {
-    for (let i = 0; i < array.length; i++) {
-      this.buffer.writeUInt8(array[i], this.index)
-      this.index++
-    }
-  }
-
   writeString(string: string) {
     const utf8Buffer = Buffer.from(string, 'utf8')
 
@@ -64,13 +56,13 @@ export class BufferWriter {
   }
 
   writeUnsignedShort(value: number) {
-    this.buffer.writeInt32BE(value, this.index)
+    this.buffer.writeUInt16BE(value, this.index)
     this.index += 2
   }
 
-  writePosition(position: Position) {
+  writePosition(x: number, y: number, z: number) {
     const value: bigint = BigInt(
-      ((position.x & 0x3FFFFFF) << 38) | ((position.z & 0x3FFFFFF) << 12) | (position.y & 0xFFF)
+      ((x & 0x3FFFFFF) << 38) | ((z & 0x3FFFFFF) << 12) | (y & 0xFFF)
     )
 
     this.writeLong(value)
@@ -81,12 +73,27 @@ export class BufferWriter {
   }
 
   writeChat(chat: Chat) {
-    this.writeJson(chat.toString())
+    this.writeJson(chat.toJson())
   }
 
   writeLong(long: bigint) {
     this.buffer.writeBigInt64BE(long, this.index)
     this.index += 8
+  }
+
+  writerBuffer(buffer: Buffer) {
+    this.buffer.write(buffer, this.index)
+    this.index += buffer.byteLength
+  }
+
+  writeDouble(double: number) {
+    this.buffer.writeDoubleBE(double, this.index)
+    this.index += 8
+  }
+
+  writeFloat(float: number) {
+    this.buffer.writeFloatBE(float, this.index)
+    this.index += 4
   }
 
   getBuffer(): Buffer {
