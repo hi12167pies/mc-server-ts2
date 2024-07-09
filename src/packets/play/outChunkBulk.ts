@@ -2,7 +2,6 @@ import { BufferReader } from "../../buffer/bufferReader";
 import { BufferWriter } from "../../buffer/bufferWriter";
 import { Dimension } from "../../enum/dimension";
 import { State } from "../../enum/state";
-import { loggerDebug } from "../../utils/logger";
 import { chunkIntToPos } from "../../utils/worldUtils";
 import { Chunk } from "../../world/chunk";
 import { Packet } from "../packet";
@@ -30,24 +29,24 @@ export class OutChunkBulkPacket implements Packet {
 
     // chunk count
     writer.writeVarInt(this.chunks.length)
-
+    
     // buffer that we can concat
     let finalBuffer = Buffer.alloc(0)
-
+    
     // chunk meta
     for (let i = 0; i < this.chunks.length; i++) {
       const chunk = this.chunks[i]
-
+      
       // chunk position
-      writer.writeInt(chunk.x)
-      writer.writeInt(chunk.z)
-
-      // bitmask containing if the section contains air or not (if it's empty)
+      writer.writeInt(Math.floor(chunk.x / 16))
+      writer.writeInt(Math.floor(chunk.z / 16))
+      
+      // bitmask containing if the section isn't empty
       let bitmask = 0
-
+      
       // final sections to be sent
       let sections = []
-
+      
       for (let i = 0; i < Chunk.SECTIONS; i++) {
         const section = chunk.sections[i]
         if (section.blocks.size <= 0) continue
@@ -55,12 +54,12 @@ export class OutChunkBulkPacket implements Packet {
         bitmask |= 1 << i
         sections.push(section)
       }
-
+      
       writer.writeUnsignedShort(bitmask)
-
+      
       // remove 1 because length is always +1
       const sectionCount = sections.length
-
+      
       // create array for block data
       let blockData = Buffer.alloc(8192 * sectionCount).fill(0)
 
@@ -74,7 +73,7 @@ export class OutChunkBulkPacket implements Packet {
           const [x, y, z] = chunkIntToPos(entry[0])
  
           // get index in array
-          const index = (y << 8 | z << 4 | x) + (8192 * i)
+          const index = (y << 8 | z << 4 | x) + (4096 * i)
           const block = entry[1]
 
           blockData[2 * index] = ((block.type << 4) | block.data)

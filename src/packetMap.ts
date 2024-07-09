@@ -12,6 +12,7 @@ import { InPlayerLookPacket } from "./packets/play/inPlayerLook"
 import { InPlayerPositionPacket } from "./packets/play/inPlayerPosition"
 import { InStatusPingPacket } from "./packets/status/inStatusPing"
 import { InStatusRequestPacket } from "./packets/status/inStatusRequest"
+import { InChatMessagePacket } from "./packets/play/inChatMessage"
 
 export type PacketMap = {
   [key in State]: {
@@ -31,6 +32,7 @@ export const packetMap: PacketMap = {
     [0x00]: InLoginStartPacket
   },
   [State.Play]: {
+    [0x01]: InChatMessagePacket,
     [0x03]: InPlayerGroundPacket,
     [0x04]: InPlayerPositionPacket,
     [0x05]: InPlayerLookPacket,

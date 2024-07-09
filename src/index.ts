@@ -7,22 +7,58 @@ import { Connection } from "./connnection"
 import { Dimension } from "./enum/dimension"
 import { Difficulty } from "./enum/difficulty"
 import { World } from "./world/world"
+import { Packet } from "./packets/packet"
+import { State } from "./enum/state"
+import { LevelType } from "./enum/levelType"
+import { OutPacketKeepAlive } from "./packets/play/outPacketKeepAlive"
+import { PlayerEntity } from "./entity/player"
+
+export const connections: Set<Connection> = new Set()
+export const players: Set<PlayerEntity> = new Set()
+
+export function broadcastPacket(packet: Packet, state: State = State.Play) {
+  connections.forEach(connection => {
+    if (connection.state != state) return
+    connection.sendPacket(packet)
+  })
+}
+
+setInterval(() => {
+  connections.forEach(connection => {
+    if (connection.state == State.Play) {
+      connection.sendPacket(new OutPacketKeepAlive(1))
+    }
+  })
+}, 15e3)
 
 const server = net.createServer()
 
-export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy)
-tempWorld.setBlockAt(0,0,0, { type: 1, data: 0 })
-tempWorld.setBlockAt(1,0,0, { type: 2, data: 0 })
-tempWorld.setBlockAt(2,55,0, { type: 2, data: 0 })
+export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy, LevelType.flat)
+
+// Grass layer
+for (let x = -32; x < 32; x++) {
+  for (let z = -32; z < 32; z++) {
+    tempWorld.setBlockAt(x, 0, z, { type: 2, data: 0 })
+  }
+}
 
 server.on("connection", (socket) => {
   const connection = new Connection(socket)
+  connections.add(connection)
 
   socket.on("error", err => {
     // Ignore errors, mostly from socket disconnecting
   })
 
+  socket.on("close", () => {
+    connection.onDisconnect()
+    connection.listening = false
+    players.delete(connection.player)
+    connections.delete(connection)
+  })
+
   socket.on("data", incomingBuffer => {
+    if (!connection.listening) return
     if (incomingBuffer[0] == 0xFE && connection.isFirstChunk) {
       // Legacy ping
       loggerWarn("Received unsupported legacy ping.")
@@ -48,14 +84,14 @@ server.on("connection", (socket) => {
         length = readVarIntBuffer(buffer, index)
       } catch (e) {
         connection.lastChunk = buffer
-        loggerDebug("Waiting for more data...")
+        loggerDebug(`Waiting for more data... (length) (current size ${buffer.length})`, buffer)
         break
       }
       index = length.index
 
       if (buffer.length < length.value) {
         connection.lastChunk = buffer
-        loggerDebug("Waiting for more data...")
+        loggerDebug(`Waiting for more data... (buffer size) (expected size ${length.value}, current size ${buffer.length})`)
         break
       }
 
@@ -71,7 +107,7 @@ server.on("connection", (socket) => {
       try {
         packetId = reader.readVarInt()
       } catch (e) {
-        loggerError("Faield to read packet id from inital buffer. ", e)
+        loggerError("Failed to read packet id from inital buffer. ", buffer, e)
         break
       }
       
@@ -79,7 +115,7 @@ server.on("connection", (socket) => {
 
       if (constructor == undefined) {
         if (packetId > 0x99) {
-          loggerError(`Packet id too large (0x${packetId.toString(16)})`, buff)
+          loggerError(`Packet id too large (0x${packetId.toString(16)} > 0x99)`, buff)
           break
         }
         loggerWarn("Unknown packet id 0x" + packetId.toString(16))

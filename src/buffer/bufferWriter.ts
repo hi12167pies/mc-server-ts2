@@ -96,6 +96,34 @@ export class BufferWriter {
     this.index += 4
   }
 
+  writeUUID(uuid: string) {
+    const uuidWithoutHyphens = uuid.replace(/-/g, '');
+
+    // Convert to byte array
+    const byteArray = []
+    for (let i = 0; i < uuidWithoutHyphens.length; i += 2) {
+      byteArray.push(parseInt(uuidWithoutHyphens.substring(i, i + 2), 16))
+    }
+
+    let msb = 0n
+    let lsb = 0n
+
+    for (let i = 0; i < 8; i++) {
+      msb = (msb << 8n) | BigInt(byteArray[i])
+    }
+
+    for (let i = 8; i < 16; i++) {
+      lsb = (lsb << 8n) | BigInt(byteArray[i])
+    }
+
+
+    this.buffer.writeBigUInt64LE(msb, this.index)
+    this.index += 8
+    
+    this.buffer.writeBigUInt64LE(lsb, this.index)
+    this.index += 8
+  }
+
   getBuffer(): Buffer {
     return this.buffer.toBuffer()
   }

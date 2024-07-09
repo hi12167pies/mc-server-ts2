@@ -1,5 +1,6 @@
 import { Difficulty } from "../enum/difficulty";
 import { Dimension } from "../enum/dimension";
+import { LevelType } from "../enum/levelType";
 import { chunkPosToBigInt } from "../utils/worldUtils";
 import { BlockData } from "./block";
 import { Chunk } from "./chunk";
@@ -7,7 +8,8 @@ import { Chunk } from "./chunk";
 export class World {
   constructor(
     public dimension: Dimension,
-    public difficulty: Difficulty
+    public difficulty: Difficulty,
+    public levelType: LevelType
   ) {}
 
   public spawnX: number = 0
