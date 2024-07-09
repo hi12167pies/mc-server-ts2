@@ -12,10 +12,15 @@ import { State } from "./enum/state"
 import { LevelType } from "./enum/levelType"
 import { OutPacketKeepAlive } from "./packets/play/outPacketKeepAlive"
 import { PlayerEntity } from "./entity/player"
+import { generateKeyPairSync } from "crypto"
+import NodeRSA from "node-rsa"
+import { getPublicKeyBytes } from "./utils/encryptionUtils"
+import { Chat } from "./chat/chat"
 
 export const connections: Set<Connection> = new Set()
 export const players: Set<PlayerEntity> = new Set()
 
+// util function
 export function broadcastPacket(packet: Packet, state: State = State.Play) {
   connections.forEach(connection => {
     if (connection.state != state) return
@@ -23,6 +28,11 @@ export function broadcastPacket(packet: Packet, state: State = State.Play) {
   })
 }
 
+// crypto
+export const serverKey = new NodeRSA({ b: 1024 })
+serverKey.setOptions({ encryptionScheme: "pkcs1", environment: "browser" })
+
+// keep alive
 setInterval(() => {
   connections.forEach(connection => {
     if (connection.state == State.Play) {
@@ -31,10 +41,8 @@ setInterval(() => {
   })
 }, 15e3)
 
-const server = net.createServer()
-
+// temp world
 export const tempWorld = new World(Dimension.Overworld, Difficulty.Easy, LevelType.flat)
-
 // Grass layer
 for (let x = -32; x < 32; x++) {
   for (let z = -32; z < 32; z++) {
@@ -42,6 +50,7 @@ for (let x = -32; x < 32; x++) {
   }
 }
 
+const server = net.createServer()
 server.on("connection", (socket) => {
   const connection = new Connection(socket)
   connections.add(connection)
@@ -128,6 +137,7 @@ server.on("connection", (socket) => {
         packet.read(reader)
       } catch (e) {
         loggerError(`Failed to read packet (0x${packetId.toString(16)}, state:${connection.state})`, e)
+        connection.disconnect(new Chat("Failed to handle packet. Check console for more information"))
         break
       }
 
@@ -135,6 +145,7 @@ server.on("connection", (socket) => {
         connection.handlePacket(packet)
       } catch (e) {
         loggerError(`Failed to handle packet (0x${packetId.toString(16)}, state:${connection.state})`, e)
+        connection.disconnect(new Chat("Failed to handle packet. Check console for more information"))
         break
       }
     }

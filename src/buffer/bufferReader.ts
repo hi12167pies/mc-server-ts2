@@ -4,6 +4,12 @@ export class BufferReader {
     public buffer: Buffer
   ) {}
 
+  readBuffer(size: number) {
+    const buffer = this.buffer.subarray(this.index, this.index + size)
+    this.index += size
+    return buffer
+  }
+
   readVarInt(): number {
     let value = 0
     // 4 is max length of varint, so if its above just ignore

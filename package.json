@@ -11,10 +11,12 @@
   "license": "ISC",
   "devDependencies": {
     "@types/colors": "^1.2.1",
-    "@types/node": "^20.14.2"
+    "@types/node": "^20.14.2",
+    "@types/node-rsa": "^1.1.4"
   },
   "dependencies": {
     "colors": "^1.4.0",
-    "dynamic-buffer": "^1.0.3"
+    "dynamic-buffer": "^1.0.3",
+    "node-rsa": "^1.1.1"
   }
 }

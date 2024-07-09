@@ -11,6 +11,7 @@ import { HandshakeHandler } from "./handler/handshakeHandler";
 import { StatusHandler } from "./handler/statusHandler";
 import { LoginHandler } from "./handler/loginHandler";
 import { PlayHandler } from "./handler/playHandler";
+import { randomBytes } from "crypto";
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -28,6 +29,10 @@ export class Connection {
   public isFirstChunk: boolean = false
   public lastChunk: Buffer | null = null
   public listening: boolean = true
+
+  // login
+  public requestedUsername: string
+  public verifyToken: Buffer = randomBytes(32)
 
   constructor(
     public socket: Socket

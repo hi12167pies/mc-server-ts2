@@ -13,6 +13,7 @@ import { InPlayerPositionPacket } from "./packets/play/inPlayerPosition"
 import { InStatusPingPacket } from "./packets/status/inStatusPing"
 import { InStatusRequestPacket } from "./packets/status/inStatusRequest"
 import { InChatMessagePacket } from "./packets/play/inChatMessage"
+import { InEncryptionResponse } from "./packets/login/inEncryptionResponse"
 
 export type PacketMap = {
   [key in State]: {
@@ -29,7 +30,8 @@ export const packetMap: PacketMap = {
     [0x01]: InStatusPingPacket,
   },
   [State.Login]: {
-    [0x00]: InLoginStartPacket
+    [0x00]: InLoginStartPacket,
+    [0x01]: InEncryptionResponse
   },
   [State.Play]: {
     [0x01]: InChatMessagePacket,

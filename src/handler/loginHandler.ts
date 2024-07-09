@@ -1,10 +1,8 @@
-import { randomUUID } from "crypto";
 import { Connection } from "../connnection";
-import { PlayerEntity } from "../entity/player";
 import { InLoginStartPacket } from "../packets/login/inLoginStart";
 import { Packet } from "../packets/packet";
 import { PacketHandler } from "./packetHandler";
-import { broadcastPacket, players, tempWorld } from "..";
+import { broadcastPacket, players, serverKey } from "..";
 import { InLoginSuccessPacket } from "../packets/login/inLoginSuccess";
 import { State } from "../enum/state";
 import { OutJoinGamePacket } from "../packets/play/outJoinGame";
@@ -13,13 +11,36 @@ import { OutSpawnPositionPacket } from "../packets/play/outSpawnPosition";
 import { OutPlayerPosLookPacket } from "../packets/play/outPlayerPosLook";
 import { OutChunkBulkPacket } from "../packets/play/outChunkBulk";
 import { OutPlayerListItem, PlayerListAction } from "../packets/play/outPlayerListItem";
+import { InEncryptionResponse } from "../packets/login/inEncryptionResponse";
+import { getPublicKeyBytes } from "../utils/encryptionUtils";
+import { OutEncryptionRequest } from "../packets/login/outEncryptionRequest";
+import { Chat } from "../chat/chat";
 
 export class LoginHandler implements PacketHandler {
   handlePacket(connection: Connection, packet: Packet): void {
 
     if (packet instanceof InLoginStartPacket) {
+      connection.requestedUsername = packet.username
+
+      connection.sendPacket(new OutEncryptionRequest(getPublicKeyBytes(serverKey), connection.verifyToken))
+    }
+    
+    if (packet instanceof InEncryptionResponse) {
+      const decryptedSecret = serverKey.decrypt(packet.sharedSecret)
+      const decryptedVerifyToken = serverKey.decrypt(packet.verifyToken)
+
+      if (!decryptedVerifyToken.equals(connection.verifyToken)) {
+        connection.disconnect(new Chat("Verify token encrypted incorrectly."))
+        return
+      }
+    }
+  }
+}
+
+function initPlayer(connection: Connection) {
       // create the player
-      connection.player = new PlayerEntity(connection, packet.username, randomUUID(), tempWorld)
+      // TODO: FIX
+      // connection.player = new PlayerEntity(connection, packet.username, randomUUID(), tempWorld)
 
       // set spawn location
       connection.player.locX = 1.5
@@ -59,7 +80,4 @@ export class LoginHandler implements PacketHandler {
       players.add(connection.player)
       
       connection.onJoin()
-    }
-    
-  }
 }
