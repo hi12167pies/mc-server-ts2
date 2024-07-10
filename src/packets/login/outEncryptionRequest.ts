@@ -1,9 +1,7 @@
-import { KeyObject } from "crypto";
 import { BufferReader } from "../../buffer/bufferReader";
 import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
-import { getPublicKeyBytes } from "../../utils/encryptionUtils";
 
 export class OutEncryptionRequest implements Packet {
   constructor(

@@ -38,8 +38,8 @@ export class OutChunkBulkPacket implements Packet {
       const chunk = this.chunks[i]
       
       // chunk position
-      writer.writeInt(Math.floor(chunk.x / 16))
-      writer.writeInt(Math.floor(chunk.z / 16))
+      writer.writeInt(chunk.x)
+      writer.writeInt(chunk.z)
       
       // bitmask containing if the section isn't empty
       let bitmask = 0

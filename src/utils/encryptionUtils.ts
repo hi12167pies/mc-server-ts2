@@ -1,12 +1,12 @@
-import { createHash } from "crypto"
+import { createHash, KeyObject } from "crypto"
 import { Connection } from "../connnection"
-import NodeRSA from "node-rsa"
+import { publicKeyBuffer } from ".."
 
 export function hexDigest(text: string, connection: Connection): string {
   const hash = createHash("sha1")
-    .update("")
-    // .update(connection.sharedSecret)
-    // .update(getKeyBytes(connection.keys.publicKey))
+    .update("") // server id (empty)
+    .update(connection.sharedSecret)
+    .update(publicKeyBuffer)
     .digest()
   
   let negative = hash.readInt8(0) < 0
@@ -33,13 +33,17 @@ function performTwosCompliment(buffer: Buffer) {
   }
 }
 
-export function getPublicKeyBytes(key: NodeRSA): Buffer {
-  const exportedKey = key.exportKey("public")
+export function getKeyBytes(key: KeyObject): Buffer {
+  const exportedKey = key.export({
+    type: "spki",
+    format: "pem",
+  }).toString()
 
   const keyNoHeaders = exportedKey
-    .replace('-----BEGIN PUBLIC KEY-----\n', '')
-    .replace('\n-----END PUBLIC KEY-----\n', '');
-    
+    .replace("-----BEGIN PUBLIC KEY-----\n", "")
+    .replace("\n-----END PUBLIC KEY-----\n", "")
+  
   const keyBytes = Buffer.from(keyNoHeaders, "base64")
+
   return keyBytes
 }

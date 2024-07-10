@@ -1,9 +1,17 @@
-import { BufferWriter } from "./src/buffer/bufferWriter";
+import { Difficulty } from "./src/enum/difficulty"
+import { Dimension } from "./src/enum/dimension"
+import { LevelType } from "./src/enum/levelType"
+import { Chunk } from "./src/world/chunk"
+import { World } from "./src/world/world"
 
-const uuid = '123e4567-e89b-12d3-a456-426614174000';
+const chunks: Set<Chunk> = new Set()
 
-const bufferWriter = new BufferWriter()
+const world = new World(Dimension.Overworld, Difficulty.Easy, LevelType.flat)
+for (let x = -32; x < 32; x++) {
+  for (let z = -32; z < 32; z++) {
+    const chunk = world.getChunkAt(x, z)
+    chunks.add(chunk)
+  }
+}
 
-bufferWriter.writeUUID(uuid)
-
-console.log(bufferWriter.getBuffer())
+console.log(chunks.size)

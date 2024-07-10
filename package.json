@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx ts-node src"
+    "test": "node --security-revert=CVE-2023-46809 -r ts-node/register src"
   },
   "keywords": [],
   "author": "",
@@ -12,11 +12,14 @@
   "devDependencies": {
     "@types/colors": "^1.2.1",
     "@types/node": "^20.14.2",
-    "@types/node-rsa": "^1.1.4"
+    "@types/node-rsa": "^1.1.4",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "colors": "^1.4.0",
     "dynamic-buffer": "^1.0.3",
+    "js-crypto-rsa": "^1.0.7",
     "node-rsa": "^1.1.1"
   }
 }

@@ -11,7 +11,11 @@ import { HandshakeHandler } from "./handler/handshakeHandler";
 import { StatusHandler } from "./handler/statusHandler";
 import { LoginHandler } from "./handler/loginHandler";
 import { PlayHandler } from "./handler/playHandler";
-import { randomBytes } from "crypto";
+import { Cipher, Decipher, randomBytes } from "crypto";
+import { broadcastPacket } from ".";
+import { OutKeepAlivePacket } from "./packets/play/outKeepAlive";
+import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
+import { OutEntityMetadataPacket } from "./packets/play/outEntityMetadata";
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -33,6 +37,9 @@ export class Connection {
   // login
   public requestedUsername: string
   public verifyToken: Buffer = randomBytes(32)
+  public sharedSecret?: Buffer
+  public cipher?: Cipher
+  public decipher?: Decipher
 
   constructor(
     public socket: Socket
@@ -57,10 +64,14 @@ export class Connection {
     lengthWriter.writeVarInt(dataBuffer.length)
 
     // join the two buffers together
-    const buffer = Buffer.concat([
+    let buffer = Buffer.concat([
       lengthWriter.getBuffer(),
       dataBuffer
     ])
+
+    if (this.cipher != null) {
+      buffer = this.cipher.update(buffer)
+    }
 
     // write to the socket
     this.socket.write(buffer)
@@ -90,10 +101,13 @@ export class Connection {
   }
 
   public onJoin() {
-
+    broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.AddPlayer, [ this.player ]))
+    broadcastPacket(new OutEntityMetadataPacket(this.player))
   }
 
   public onDisconnect() {
-
+    if (this.state == State.Play) {
+      broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.RemovePlayer, [ this.player ]))
+    }
   }
 }

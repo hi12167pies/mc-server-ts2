@@ -10,12 +10,11 @@ import { World } from "./world/world"
 import { Packet } from "./packets/packet"
 import { State } from "./enum/state"
 import { LevelType } from "./enum/levelType"
-import { OutPacketKeepAlive } from "./packets/play/outPacketKeepAlive"
+import { OutKeepAlivePacket } from "./packets/play/outKeepAlive"
 import { PlayerEntity } from "./entity/player"
-import { generateKeyPairSync } from "crypto"
-import NodeRSA from "node-rsa"
-import { getPublicKeyBytes } from "./utils/encryptionUtils"
 import { Chat } from "./chat/chat"
+import { generateKeyPairSync, KeyPairKeyObjectResult } from "crypto"
+import { getKeyBytes } from "./utils/encryptionUtils"
 
 export const connections: Set<Connection> = new Set()
 export const players: Set<PlayerEntity> = new Set()
@@ -28,15 +27,17 @@ export function broadcastPacket(packet: Packet, state: State = State.Play) {
   })
 }
 
-// crypto
-export const serverKey = new NodeRSA({ b: 1024 })
-serverKey.setOptions({ encryptionScheme: "pkcs1", environment: "browser" })
+// encryptions
+export let serverKey: KeyPairKeyObjectResult = generateKeyPairSync("rsa", {
+  modulusLength: 1024
+})
+export const publicKeyBuffer: Buffer = getKeyBytes(serverKey.publicKey)
 
 // keep alive
 setInterval(() => {
   connections.forEach(connection => {
     if (connection.state == State.Play) {
-      connection.sendPacket(new OutPacketKeepAlive(1))
+      connection.sendPacket(new OutKeepAlivePacket(1))
     }
   })
 }, 15e3)
@@ -79,6 +80,10 @@ server.on("connection", (socket) => {
       connection.isFirstChunk = false
     }
 
+    if (connection.decipher != null) {
+      incomingBuffer = connection.decipher.update(incomingBuffer)
+    }
+
     let buffer = incomingBuffer
     if (connection.lastChunk != null) {
       buffer = Buffer.concat([connection.lastChunk, incomingBuffer])
@@ -104,10 +109,11 @@ server.on("connection", (socket) => {
         break
       }
 
-      const buff = buffer.subarray(index, length.value + 1)
+      const buff = buffer.subarray(index, index + length.value + 1)
+      index += length.value
 
       // resize original
-      buffer = buffer.subarray(length.value + 1, buffer.length)
+      buffer = buffer.subarray(index, buffer.length)
 
       const reader = new BufferReader(buff)
 

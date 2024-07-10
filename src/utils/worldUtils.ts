@@ -1,20 +1,4 @@
 /**
- * @returns combined ints
- */
-export function chunkPosToBigInt(x: number, z: number): bigint {
-  return (BigInt(x) << 32n) | BigInt(z)
-}
-
-/**
- * @returns the int as [x, z]
- */
-export function bigIntToChunkPos(int: bigint): [number, number] {
-  const z = int & 0xFF_FF_FF_FFn
-  const x = (int >> 32n) & 0xFF_FF_FF_FFn
-  return [ Number(x), Number(z) ]
-}
-
-/**
  * @param x Must only be 0-255
  * @param y Must only be 0-255
  * @param z Must only be 0-255

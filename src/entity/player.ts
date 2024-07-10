@@ -19,4 +19,12 @@ export class PlayerEntity extends Entity {
   ) {
     super(world)
   }
+
+  setProperty(property: Property) {
+    if (!this.properties.has(property.name)) {
+      this.properties.set(property.name, [])
+    }
+    const propertyList = this.properties.get(property.name)
+    propertyList.push(property)
+  }
 }

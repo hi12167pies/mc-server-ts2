@@ -97,30 +97,16 @@ export class BufferWriter {
   }
 
   writeUUID(uuid: string) {
-    const uuidWithoutHyphens = uuid.replace(/-/g, '');
+    const uuidWithoutHyphens = uuid.replace(/-/g, '')
 
-    // Convert to byte array
-    const byteArray = []
-    for (let i = 0; i < uuidWithoutHyphens.length; i += 2) {
-      byteArray.push(parseInt(uuidWithoutHyphens.substring(i, i + 2), 16))
-    }
+    // Note: UUID is in hex
+    const msb = BigInt("0x" + uuidWithoutHyphens.substring(0, 16))
+    const lsb = BigInt("0x" + uuidWithoutHyphens.substring(16, 32))
 
-    let msb = 0n
-    let lsb = 0n
-
-    for (let i = 0; i < 8; i++) {
-      msb = (msb << 8n) | BigInt(byteArray[i])
-    }
-
-    for (let i = 8; i < 16; i++) {
-      lsb = (lsb << 8n) | BigInt(byteArray[i])
-    }
-
-
-    this.buffer.writeBigUInt64LE(msb, this.index)
+    this.buffer.writeBigUInt64BE(msb, this.index)
     this.index += 8
-    
-    this.buffer.writeBigUInt64LE(lsb, this.index)
+
+    this.buffer.writeBigUInt64BE(lsb, this.index)
     this.index += 8
   }
 

@@ -14,6 +14,8 @@ import { InStatusPingPacket } from "./packets/status/inStatusPing"
 import { InStatusRequestPacket } from "./packets/status/inStatusRequest"
 import { InChatMessagePacket } from "./packets/play/inChatMessage"
 import { InEncryptionResponse } from "./packets/login/inEncryptionResponse"
+import { InKeepAlivePacket } from "./packets/play/inKeepAlive"
+import { InEntityActionPacket } from "./packets/play/inEntityAction"
 
 export type PacketMap = {
   [key in State]: {
@@ -34,12 +36,14 @@ export const packetMap: PacketMap = {
     [0x01]: InEncryptionResponse
   },
   [State.Play]: {
+    [0x00]: InKeepAlivePacket,
     [0x01]: InChatMessagePacket,
     [0x03]: InPlayerGroundPacket,
     [0x04]: InPlayerPositionPacket,
     [0x05]: InPlayerLookPacket,
     [0x06]: InPlayerPosLookPacket,
     [0x0A]: InArmAnimation,
+    [0x0B]: InEntityActionPacket,
     [0x13]: InPlayerAbilitiesPacket,
     [0x15]: InClientSettingsPacket,
     [0x17]: InPluginMessage

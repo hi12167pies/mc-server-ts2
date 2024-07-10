@@ -3,10 +3,8 @@ import { BufferWriter } from "../../buffer/bufferWriter";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export class OutPacketKeepAlive implements Packet {
-  constructor(
-    public id: number
-  ) {}
+export class InKeepAlivePacket implements Packet {
+  public id: number
 
   getId(): number {
     return 0x00
@@ -15,11 +13,11 @@ export class OutPacketKeepAlive implements Packet {
   getState(): State {
     return State.Play
   }
-  
+
   read(reader: BufferReader): void {
+    this.id = reader.readVarInt()
   }
-  
+
   write(writer: BufferWriter): void {
-    writer.writeVarInt(this.id)
   }
 }

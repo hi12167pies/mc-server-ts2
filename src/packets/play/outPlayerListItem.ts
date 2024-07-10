@@ -12,7 +12,7 @@ export enum PlayerListAction {
   RemovePlayer = 4
 }
 
-export class OutPlayerListItem implements Packet {
+export class OutPlayerListItemPacket implements Packet {
   constructor(
     public action: PlayerListAction,
     public players: PlayerEntity[],
@@ -68,10 +68,16 @@ export class OutPlayerListItem implements Packet {
           }
           break
         case PlayerListAction.UpdateGamemode:
+          writer.writeVarInt(player.gamemode)
           break
         case PlayerListAction.UpdatePing:
+          writer.writeVarInt(player.ping)
           break
         case PlayerListAction.UpdateDisplayName:
+          writer.writeBoolean(player.displayName != undefined)
+          if (player.displayName != undefined) {
+            writer.writeChat(player.displayName)
+          }
           break
         case PlayerListAction.RemovePlayer:
           break

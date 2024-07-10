@@ -1,7 +1,6 @@
 import { Difficulty } from "../enum/difficulty";
 import { Dimension } from "../enum/dimension";
 import { LevelType } from "../enum/levelType";
-import { chunkPosToBigInt } from "../utils/worldUtils";
 import { BlockData } from "./block";
 import { Chunk } from "./chunk";
 
@@ -16,17 +15,20 @@ export class World {
   public spawnY: number = 0
   public spawnZ: number = 0
 
-  public chunks: Map<bigint, Chunk> = new Map()
+  public chunks: Set<Chunk> = new Set()
 
   getChunkAt(x: number, z: number): Chunk {
-    const chunkX = Math.floor(x / 16) * 16
-    const chunkZ = Math.floor(z / 16) * 16
-    const chunkPos: bigint = chunkPosToBigInt(chunkX, chunkZ)
-    if (this.chunks.has(chunkPos)) {
-      return this.chunks.get(chunkPos)
+    const chunkX = Math.floor(x / 16)
+    const chunkZ = Math.floor(z / 16)
+
+    for (const chunk of this.chunks.values()) {
+      if (chunk.x == chunkX && chunk.z == chunkZ) {
+        return chunk
+      }
     }
+
     const chunk = new Chunk(chunkX, chunkZ)
-    this.chunks.set(chunkPos, chunk)
+    this.chunks.add(chunk)
     return chunk
   }
 
