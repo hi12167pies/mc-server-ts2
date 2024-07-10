@@ -20,9 +20,10 @@ export const connections: Set<Connection> = new Set()
 export const players: Set<PlayerEntity> = new Set()
 
 // util function
-export function broadcastPacket(packet: Packet, state: State = State.Play) {
+export function broadcastPacket(packet: Packet, ignoredConnections: Connection[] = []) {
   connections.forEach(connection => {
-    if (connection.state != state) return
+    if (connection.state != State.Play) return
+    if (ignoredConnections.includes(connection)) return
     connection.sendPacket(packet)
   })
 }

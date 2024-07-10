@@ -13,9 +13,14 @@ import { LoginHandler } from "./handler/loginHandler";
 import { PlayHandler } from "./handler/playHandler";
 import { Cipher, Decipher, randomBytes } from "crypto";
 import { broadcastPacket } from ".";
+<<<<<<< HEAD
+import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
+import { OutEntityDestoryPacket } from "./packets/play/outEntityDestroy";
+=======
 import { OutKeepAlivePacket } from "./packets/play/outKeepAlive";
 import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
 import { OutEntityMetadataPacket } from "./packets/play/outEntityMetadata";
+>>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -101,13 +106,29 @@ export class Connection {
   }
 
   public onJoin() {
+<<<<<<< HEAD
+=======
     broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.AddPlayer, [ this.player ]))
     broadcastPacket(new OutEntityMetadataPacket(this.player))
+>>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   }
 
   public onDisconnect() {
     if (this.state == State.Play) {
       broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.RemovePlayer, [ this.player ]))
+<<<<<<< HEAD
+      broadcastPacket(new OutEntityDestoryPacket([ this.player.eid ]))
     }
+  }
+
+  private lastLocX = 0
+  private lastLocY = 0
+  private lastLocZ = 0
+
+  public onMove() {
+    
+=======
+    }
+>>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   }
 }

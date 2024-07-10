@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+function a(value: number) {
+  console.log(Math.floor(value * 256 / 360))
+}
+
+a(180)
+a(4.0902228355407715)
+=======
 import { Difficulty } from "./src/enum/difficulty"
 import { Dimension } from "./src/enum/dimension"
 import { LevelType } from "./src/enum/levelType"
@@ -15,3 +23,4 @@ for (let x = -32; x < 32; x++) {
 }
 
 console.log(chunks.size)
+>>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700

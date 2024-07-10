@@ -3,6 +3,7 @@ import { Connection } from "../connnection";
 import { Gamemode } from "../enum/gamemode";
 import { World } from "../world/world";
 import { Entity } from "./entity";
+import { Inventory } from "./inventory";
 import { Property } from "./properties";
 
 export class PlayerEntity extends Entity {
@@ -10,6 +11,7 @@ export class PlayerEntity extends Entity {
   public gamemode: Gamemode = Gamemode.Creative
   public ping: number = 0
   public displayName?: Chat
+  public inventory: Inventory = new Inventory()
 
   constructor(
     public connection: Connection,

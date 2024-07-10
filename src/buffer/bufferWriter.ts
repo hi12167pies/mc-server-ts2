@@ -1,5 +1,6 @@
 import { DynamicBuffer } from "dynamic-buffer"
 import { Chat } from "../chat/chat"
+import { loggerDebug } from "../utils/logger"
 
 export class BufferWriter {
   private buffer: DynamicBuffer
@@ -57,6 +58,11 @@ export class BufferWriter {
 
   writeUnsignedShort(value: number) {
     this.buffer.writeUInt16BE(value, this.index)
+    this.index += 2
+  }
+
+  writeShort(value: number) {
+    this.buffer.writeInt16BE(value, this.index)
     this.index += 2
   }
 

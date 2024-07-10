@@ -31,6 +31,9 @@ export class OutEntityMetadataPacket implements Packet {
   write(writer: BufferWriter): void {
     writer.writeVarInt(this.entity.eid)
     
+<<<<<<< HEAD
+    this.entity.writeMetadata(writer)
+=======
     this.entity.writeMetadata(writer, this)
   }
 
@@ -42,5 +45,6 @@ export class OutEntityMetadataPacket implements Packet {
         writer.writeByte(value)
         break
     }
+>>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   }
 }

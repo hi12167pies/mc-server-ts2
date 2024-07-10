@@ -16,7 +16,6 @@ export class OutPlayerListItemPacket implements Packet {
   constructor(
     public action: PlayerListAction,
     public players: PlayerEntity[],
-
   ) {}
 
   getId(): number {
