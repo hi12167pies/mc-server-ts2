@@ -4,7 +4,7 @@ import { Packet } from "./packets/packet";
 import { BufferWriter } from "./buffer/bufferWriter";
 import { Chat } from "./chat/chat";
 import { PlayerEntity } from "./entity/player";
-import { loggerDebug, loggerError } from "./utils/logger";
+import { loggerError } from "./utils/logger";
 import { OutLoginDisconnectPacket } from "./packets/login/outLoginDisconnect";
 import { PacketHandler } from "./handler/packetHandler";
 import { HandshakeHandler } from "./handler/handshakeHandler";
@@ -15,8 +15,7 @@ import { Cipher, Decipher, randomBytes } from "crypto";
 import { broadcastPacket } from ".";
 import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
 import { OutEntityDestoryPacket } from "./packets/play/outEntityDestroy";
-import { OutRelativeMovePacket } from "./packets/play/outRelativeMove";
-import { distance, distanceSqaured } from "./utils/mathUtils";
+import { distanceSqaured } from "./utils/mathUtils";
 import { OutEntityTeleportPacket } from "./packets/play/outEntityTeleport";
 import { ChatPosition, OutChatMessagePacket } from "./packets/play/outChatMessage";
 import { OutPlayDisconnectPacket } from "./packets/play/outPlayDisconnect";
@@ -117,11 +116,15 @@ export class Connection {
   private lastLocX = 0
   private lastLocY = 0
   private lastLocZ = 0
+  private lastYaw = 0
+  private lastPitch = 0
 
   public onMove() {
     if (this.player.locX == this.lastLocX
       && this.player.locY == this.lastLocY
       && this.player.locZ == this.lastLocZ
+      && this.player.yaw == this.lastYaw
+      && this.player.pitch == this.lastPitch
     ) return
     
     const dist = distanceSqaured(
@@ -130,24 +133,12 @@ export class Connection {
     )
 
     this.teleport(this.player.locX, this.player.locY, this.player.locZ)
-    // if (dist > 4 ** 2) {
-    //   this.sendMessage("Teleported")
-    // } else {
-    //   broadcastPacket(new OutRelativeMovePacket(
-    //     this.player.eid,
-    //     this.player.locX,
-    //     this.player.locY,
-    //     this.player.locZ,
-    //     this.lastLocX,
-    //     this.lastLocY,
-    //     this.lastLocZ,
-    //     this.player.ground
-    //   ), [ this ])
-    // }
 
     this.lastLocX = this.player.locX
     this.lastLocY = this.player.locY
     this.lastLocZ = this.player.locZ
+    this.lastYaw = this.player.yaw
+    this.lastPitch = this.player.pitch
   }
 
   sendMessage(message: string | Chat, pos: ChatPosition = ChatPosition.Chat) {
@@ -156,8 +147,12 @@ export class Connection {
   }
 
   teleport(x: number, y: number, z: number, yaw?: number, pitch?: number) {
-    if (yaw == undefined) yaw = this.player.yaw
-    if (pitch == undefined) pitch = this.player.pitch
+    if (yaw == undefined) {
+      yaw = this.player.yaw
+    }
+    if (pitch == undefined) {
+      pitch = this.player.pitch
+    }
     broadcastPacket(new OutEntityTeleportPacket(
       this.player.eid,
       x, y, z,
