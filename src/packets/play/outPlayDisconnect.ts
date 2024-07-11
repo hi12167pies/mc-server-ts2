@@ -1,36 +1,26 @@
 import { BufferReader } from "../../buffer/bufferReader";
 import { BufferWriter } from "../../buffer/bufferWriter";
-import { Entity } from "../../entity/entity";
+import { Chat } from "../../chat/chat";
 import { State } from "../../enum/state";
 import { Packet } from "../packet";
 
-export enum MetadataIndex {
-  OuterSkinLayer = 10
-}
-
-export enum MetadataType {
-  Byte = 0
-}
-
-export class OutEntityMetadataPacket implements Packet {
+export class OutPlayDisconnectPacket implements Packet {
   constructor(
-    public entity: Entity
+    public reason: Chat
   ) {}
 
   getId(): number {
-    return 0x1C
+    return 0x40
   }
 
   getState(): State {
     return State.Play
   }
-
+  
   read(reader: BufferReader): void {
   }
   
   write(writer: BufferWriter): void {
-    writer.writeVarInt(this.entity.eid)
-    
-    this.entity.writeMetadata(writer)
+    writer.writeChat(this.reason)
   }
 }

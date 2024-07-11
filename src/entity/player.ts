@@ -13,6 +13,10 @@ export class PlayerEntity extends Entity {
   public displayName?: Chat
   public inventory: Inventory = new Inventory()
 
+  public sneaking: boolean = false
+  public sprinting: boolean = false
+  public ground: boolean = false
+
   constructor(
     public connection: Connection,
     public username: string,

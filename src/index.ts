@@ -15,9 +15,15 @@ import { PlayerEntity } from "./entity/player"
 import { Chat } from "./chat/chat"
 import { generateKeyPairSync, KeyPairKeyObjectResult } from "crypto"
 import { getKeyBytes } from "./utils/encryptionUtils"
+import { readFileSync } from "fs"
+import path from "path"
+import { Config } from "./types"
 
 export const connections: Set<Connection> = new Set()
 export const players: Set<PlayerEntity> = new Set()
+
+// config
+export const config: Config = JSON.parse(readFileSync(path.join(process.cwd(), "config.json"), "utf8"))
 
 // util function
 export function broadcastPacket(packet: Packet, ignoredConnections: Connection[] = []) {

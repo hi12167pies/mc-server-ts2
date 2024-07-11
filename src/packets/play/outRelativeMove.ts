@@ -7,9 +7,12 @@ import { Packet } from "../packet";
 export class OutRelativeMovePacket implements Packet {
   constructor(
     public eid: number,
-    public deltaX: number,
-    public deltaY: number,
-    public deltaZ: number,
+    public x: number,
+    public y: number,
+    public z: number,
+    public lastX: number,
+    public lastY: number,
+    public lastZ: number,
     public ground: boolean
   ) {}
 
@@ -26,9 +29,9 @@ export class OutRelativeMovePacket implements Packet {
 
   write(writer: BufferWriter): void {
     writer.writeVarInt(this.eid)
-    writer.writeByte(toFixedNumber(this.deltaX))
-    writer.writeByte(toFixedNumber(this.deltaY))
-    writer.writeByte(toFixedNumber(this.deltaZ))
+    writer.writeByte(toFixedNumber(this.x) - toFixedNumber(this.lastX))
+    writer.writeByte(toFixedNumber(this.y) - toFixedNumber(this.lastY))
+    writer.writeByte(toFixedNumber(this.z) - toFixedNumber(this.lastZ))
     writer.writeBoolean(this.ground)
   }
 }

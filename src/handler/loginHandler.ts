@@ -2,7 +2,7 @@ import { Connection } from "../connnection";
 import { InLoginStartPacket } from "../packets/login/inLoginStart";
 import { Packet } from "../packets/packet";
 import { PacketHandler } from "./packetHandler";
-import { broadcastPacket, players, publicKeyBuffer, serverKey, tempWorld } from "..";
+import { broadcastPacket, config, players, publicKeyBuffer, serverKey, tempWorld } from "..";
 import { InLoginSuccessPacket } from "../packets/login/inLoginSuccess";
 import { State } from "../enum/state";
 import { OutJoinGamePacket } from "../packets/play/outJoinGame";
@@ -10,26 +10,18 @@ import { OutSetDifficultyPacket } from "../packets/play/outSetDifficulty";
 import { OutSpawnPositionPacket } from "../packets/play/outSpawnPosition";
 import { OutPlayerPosLookPacket } from "../packets/play/outPlayerPosLook";
 import { OutChunkBulkPacket } from "../packets/play/outChunkBulk";
-<<<<<<< HEAD
-=======
-import { OutPlayerListItemPacket, PlayerListAction } from "../packets/play/outPlayerListItem";
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
 import { InEncryptionResponse } from "../packets/login/inEncryptionResponse";
 import { hexDigest } from "../utils/encryptionUtils";
-import { OutEncryptionRequest } from "../packets/login/outEncryptionRequest";
 import { Chat } from "../chat/chat";
 import { constants, createCipheriv, createDecipheriv, privateDecrypt, randomUUID } from "crypto";
 import axios from "axios";
 import { PlayerEntity } from "../entity/player";
 import { hasJoinedResponse } from "../mojangTypes";
 import { dashUUID } from "../utils/uuidUtils";
-<<<<<<< HEAD
 import { OutPlayerListItemPacket, PlayerListAction } from "../packets/play/outPlayerListItem";
 import { OutEntityMetadataPacket } from "../packets/play/outEntityMetadata";
 import { OutSpawnPlayerPacket } from "../packets/play/outSpawnPlayer";
-=======
-import { OutEntityMetadataPacket } from "../packets/play/outEntityMetadata";
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
+import { OutEncryptionRequest } from "../packets/login/outEncryptionRequest";
 
 export class LoginHandler implements PacketHandler {
   async handlePacket(connection: Connection, packet: Packet): Promise<void> {
@@ -37,20 +29,18 @@ export class LoginHandler implements PacketHandler {
     if (packet instanceof InLoginStartPacket) {
       connection.requestedUsername = packet.username
 
-<<<<<<< HEAD
       // Offline mode
-      initPlayer(connection, {
-        id: randomUUID().replaceAll("-", ""),
-        name: connection.requestedUsername,
-        properties: [],
-        profileActions: []
-      })
+      if (config.online_mode) {
+        connection.sendPacket(new OutEncryptionRequest(publicKeyBuffer, connection.verifyToken))
 
-      // Online mode
-      // connection.sendPacket(new OutEncryptionRequest(publicKeyBuffer, connection.verifyToken))
-=======
-      connection.sendPacket(new OutEncryptionRequest(publicKeyBuffer, connection.verifyToken))
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
+      } else {
+        initPlayer(connection, {
+          id: randomUUID().replaceAll("-", ""),
+          name: connection.requestedUsername,
+          properties: [],
+          profileActions: []
+        })
+      }
     }
     
     if (packet instanceof InEncryptionResponse) {
@@ -97,7 +87,6 @@ export class LoginHandler implements PacketHandler {
 
 function initPlayer(connection: Connection, response: hasJoinedResponse) {
   // create the player
-<<<<<<< HEAD
   const player = new PlayerEntity(connection, response.name, dashUUID(response.id), tempWorld)
   connection.player = player
 
@@ -114,27 +103,11 @@ function initPlayer(connection: Connection, response: hasJoinedResponse) {
   
   // complete login
   connection.sendPacket(new InLoginSuccessPacket(player.username, player.uuid))
-=======
-  connection.player = new PlayerEntity(connection, response.name, dashUUID(response.id), tempWorld)
-  for (let i = 0; i < response.properties.length; i++) {
-    const property = response.properties[i]
-    connection.player.setProperty(property)
-  }
-
-  // set spawn location
-  connection.player.locX = 1.5
-  connection.player.locY = 1.5
-  connection.player.locZ = 1.5
-  
-  // complete login
-  connection.sendPacket(new InLoginSuccessPacket(connection.player.username, connection.player.uuid))
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   // this.sendPacket(new SetCompressionPacket(-1))
 
   // change state and init the player
   connection.state = State.Play
   
-<<<<<<< HEAD
   // send join game
   connection.sendPacket(new OutJoinGamePacket(
     player.eid,
@@ -173,28 +146,5 @@ function initPlayer(connection: Connection, response: hasJoinedResponse) {
   // add to player list
   players.add(player)
 
-=======
-  // init the player
-  connection.sendPacket(new OutJoinGamePacket(
-    connection.player.eid,
-    connection.player.gamemode,
-    connection.player.world.dimension,
-    connection.player.world.difficulty,
-    100,
-    connection.player.world.levelType,
-    false
-  ))
-
-  connection.sendPacket(new OutSetDifficultyPacket(connection.player.world.difficulty))
-  connection.sendPacket(new OutSpawnPositionPacket(connection.player.world.spawnX, connection.player.world.spawnY, connection.player.world.spawnZ))
-
-  connection.sendPacket(new OutPlayerPosLookPacket(connection.player.locX, connection.player.locY, connection.player.locZ, connection.player.yaw, connection.player.pitch))
-
-  const chunks = [...connection.player.world.chunks.values()]
-  connection.sendPacket(new OutChunkBulkPacket(connection.player.world.dimension, chunks))
-  
-  players.add(connection.player)
-
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   connection.onJoin()
 }

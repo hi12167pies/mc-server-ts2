@@ -3,5 +3,5 @@ export function toFixedNumber(value: number) {
 }
 
 export function toAngle(value: number) {
-  return Math.floor(value * 256 / 360)
+  return (value / 360) * 256
 }

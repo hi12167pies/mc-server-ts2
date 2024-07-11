@@ -1,6 +1,5 @@
 import { DynamicBuffer } from "dynamic-buffer"
 import { Chat } from "../chat/chat"
-import { loggerDebug } from "../utils/logger"
 
 export class BufferWriter {
   private buffer: DynamicBuffer

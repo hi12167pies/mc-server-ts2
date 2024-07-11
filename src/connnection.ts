@@ -13,14 +13,13 @@ import { LoginHandler } from "./handler/loginHandler";
 import { PlayHandler } from "./handler/playHandler";
 import { Cipher, Decipher, randomBytes } from "crypto";
 import { broadcastPacket } from ".";
-<<<<<<< HEAD
 import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
 import { OutEntityDestoryPacket } from "./packets/play/outEntityDestroy";
-=======
-import { OutKeepAlivePacket } from "./packets/play/outKeepAlive";
-import { OutPlayerListItemPacket, PlayerListAction } from "./packets/play/outPlayerListItem";
-import { OutEntityMetadataPacket } from "./packets/play/outEntityMetadata";
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
+import { OutRelativeMovePacket } from "./packets/play/outRelativeMove";
+import { distance, distanceSqaured } from "./utils/mathUtils";
+import { OutEntityTeleportPacket } from "./packets/play/outEntityTeleport";
+import { ChatPosition, OutChatMessagePacket } from "./packets/play/outChatMessage";
+import { OutPlayDisconnectPacket } from "./packets/play/outPlayDisconnect";
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -88,7 +87,7 @@ export class Connection {
     }
 
     if (this.state == State.Play) {
-      loggerDebug("Unimplemented disconnect on play")
+      this.sendPacket(new OutPlayDisconnectPacket(reason))
     }
 
     if (!this.socket.closed) {
@@ -106,17 +105,11 @@ export class Connection {
   }
 
   public onJoin() {
-<<<<<<< HEAD
-=======
-    broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.AddPlayer, [ this.player ]))
-    broadcastPacket(new OutEntityMetadataPacket(this.player))
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
   }
 
   public onDisconnect() {
     if (this.state == State.Play) {
       broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.RemovePlayer, [ this.player ]))
-<<<<<<< HEAD
       broadcastPacket(new OutEntityDestoryPacket([ this.player.eid ]))
     }
   }
@@ -126,9 +119,50 @@ export class Connection {
   private lastLocZ = 0
 
   public onMove() {
+    if (this.player.locX == this.lastLocX
+      && this.player.locY == this.lastLocY
+      && this.player.locZ == this.lastLocZ
+    ) return
     
-=======
-    }
->>>>>>> abe2345d1a24600309d3ebd0dcd9efd41fb00700
+    const dist = distanceSqaured(
+      this.player.locX, this.player.locY, this.player.locZ,
+      this.lastLocX, this.lastLocY, this.lastLocZ
+    )
+
+    this.teleport(this.player.locX, this.player.locY, this.player.locZ)
+    // if (dist > 4 ** 2) {
+    //   this.sendMessage("Teleported")
+    // } else {
+    //   broadcastPacket(new OutRelativeMovePacket(
+    //     this.player.eid,
+    //     this.player.locX,
+    //     this.player.locY,
+    //     this.player.locZ,
+    //     this.lastLocX,
+    //     this.lastLocY,
+    //     this.lastLocZ,
+    //     this.player.ground
+    //   ), [ this ])
+    // }
+
+    this.lastLocX = this.player.locX
+    this.lastLocY = this.player.locY
+    this.lastLocZ = this.player.locZ
+  }
+
+  sendMessage(message: string | Chat, pos: ChatPosition = ChatPosition.Chat) {
+    const obj = message instanceof Chat ? message : new Chat(message)
+    this.sendPacket(new OutChatMessagePacket(obj, pos))
+  }
+
+  teleport(x: number, y: number, z: number, yaw?: number, pitch?: number) {
+    if (yaw == undefined) yaw = this.player.yaw
+    if (pitch == undefined) pitch = this.player.pitch
+    broadcastPacket(new OutEntityTeleportPacket(
+      this.player.eid,
+      x, y, z,
+      yaw, pitch,
+      this.player.ground
+    ), [ this ])
   }
 }
