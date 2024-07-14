@@ -18,12 +18,16 @@ import { getKeyBytes } from "./utils/encryptionUtils"
 import { readFileSync } from "fs"
 import path from "path"
 import { Config } from "./types"
+import { loadPlugins } from "./plugin/pluginManager"
 
 export const connections: Set<Connection> = new Set()
 export const players: Set<PlayerEntity> = new Set()
 
 // config
 export const config: Config = JSON.parse(readFileSync(path.join(process.cwd(), "config.json"), "utf8"))
+
+// plugins
+loadPlugins()
 
 // util function
 export function broadcastPacket(packet: Packet, ignoredConnections: Connection[] = []) {

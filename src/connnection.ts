@@ -19,6 +19,9 @@ import { distanceSqaured } from "./utils/mathUtils";
 import { OutEntityTeleportPacket } from "./packets/play/outEntityTeleport";
 import { ChatPosition, OutChatMessagePacket } from "./packets/play/outChatMessage";
 import { OutPlayDisconnectPacket } from "./packets/play/outPlayDisconnect";
+import { callEvent } from "./plugin/events";
+import { JoinEvent } from "./plugin/events/JoinEvent";
+import { LeaveEvent } from "./plugin/events/LeaveEvent";
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -104,10 +107,12 @@ export class Connection {
   }
 
   public onJoin() {
+    callEvent(new JoinEvent(this))
   }
 
   public onDisconnect() {
     if (this.state == State.Play) {
+      callEvent(new LeaveEvent(this))
       broadcastPacket(new OutPlayerListItemPacket(PlayerListAction.RemovePlayer, [ this.player ]))
       broadcastPacket(new OutEntityDestoryPacket([ this.player.eid ]))
     }

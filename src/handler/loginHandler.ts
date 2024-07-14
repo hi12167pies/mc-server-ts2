@@ -22,6 +22,8 @@ import { OutPlayerListItemPacket, PlayerListAction } from "../packets/play/outPl
 import { OutEntityMetadataPacket } from "../packets/play/outEntityMetadata";
 import { OutSpawnPlayerPacket } from "../packets/play/outSpawnPlayer";
 import { OutEncryptionRequest } from "../packets/login/outEncryptionRequest";
+import { callEvent } from "../plugin/events";
+import { LoginEvent } from "../plugin/events/LoginEvent";
 
 export class LoginHandler implements PacketHandler {
   async handlePacket(connection: Connection, packet: Packet): Promise<void> {
@@ -29,10 +31,13 @@ export class LoginHandler implements PacketHandler {
     if (packet instanceof InLoginStartPacket) {
       connection.requestedUsername = packet.username
 
+      if (callEvent(new LoginEvent(connection)).cancelled) {
+        return
+      } 
+
       // Offline mode
       if (config.online_mode) {
         connection.sendPacket(new OutEncryptionRequest(publicKeyBuffer, connection.verifyToken))
-
       } else {
         initPlayer(connection, {
           id: randomUUID().replaceAll("-", ""),
