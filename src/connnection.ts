@@ -22,6 +22,7 @@ import { OutPlayDisconnectPacket } from "./packets/play/outPlayDisconnect";
 import { callEvent } from "./plugin/events";
 import { JoinEvent } from "./plugin/events/JoinEvent";
 import { LeaveEvent } from "./plugin/events/LeaveEvent";
+import { PacketInEvent, PacketOutEvent } from "./plugin/events/PacketEvents";
 
 export class Connection {
   private static packetHandlers: Map<State, PacketHandler> = new Map()
@@ -52,6 +53,10 @@ export class Connection {
   ) {}
 
   public sendPacket(packet: Packet) {
+    if (callEvent(new PacketOutEvent(this, packet)).cancelled) {
+      return
+    }
+
     const dataWriter = new BufferWriter()
 
     // write packet id
@@ -98,6 +103,9 @@ export class Connection {
   }
 
   public handlePacket(packet: Packet) {
+    if (callEvent(new PacketInEvent(this, packet)).cancelled) {
+      return
+    }
     const packetHandler = Connection.packetHandlers.get(this.state)
     if (packetHandler == undefined) {
       loggerError("Warning: No packet handler exists for state " + this.state)
