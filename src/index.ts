@@ -166,6 +166,6 @@ server.on("connection", (socket) => {
 })
 
 
-server.listen(25567, () => {
+server.listen(config.port, () => {
   loggerInfo("Server online " + (server.address() as net.SocketAddress).port)
 })
