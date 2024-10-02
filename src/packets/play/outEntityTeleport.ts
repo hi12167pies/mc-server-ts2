@@ -31,7 +31,6 @@ export class OutEntityTeleportPacket implements Packet {
     writer.writeInt(toFixedNumber(this.x))
     writer.writeInt(toFixedNumber(this.y))
     writer.writeInt(toFixedNumber(this.z))
-    console.log(this.yaw, this.pitch)
     writer.writeByte(toAngle(this.yaw)) // yaw
     writer.writeByte(toAngle(this.pitch)) // pitch
     writer.writeBoolean(this.ground)
